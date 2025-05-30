@@ -14,7 +14,8 @@ module.exports = {
           700: "#1d4ed8",
         },
         mono: {
-          background: "#e0e0e0",
+          background: "#f0f0f0",
+          context: "#e0e0e0",
           secondary: "#ffffff",
           accent: "#eeeeee",
           accent2: "#cdcdcd",

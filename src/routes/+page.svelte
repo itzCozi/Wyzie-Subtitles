@@ -99,7 +99,7 @@
 
 <div>
   <div class="flex flex-col min-h-screen">
-    <header class="sticky top-0 z-10 bg-mono-secondary shadow-sm py-4 px-5">
+    <header class="sticky top-0 z-10 bg-mono-secondary shadow-md py-4 px-5">
       <a
         href="https://sub.wyzie.ru"
         class="hover:no-underline"
@@ -230,8 +230,9 @@
               id="source"
               class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md"
               bind:value={hearingImpaired}>
-              <option value="opensubtitles">Only show</option>
-              <option value="subdl">Exclude</option>
+              <option value="true">Only show</option>
+              <option value="false">Exclude</option>
+              <option value="indifferent">Show both</option>
             </select>
           </div>
         </div>
