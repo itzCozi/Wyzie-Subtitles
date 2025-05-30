@@ -1,11 +1,14 @@
 <script>
   import { onMount, onDestroy } from "svelte";
-  import { browser } from '$app/environment';
+  import { browser } from "$app/environment";
 
   let selectedContentType = "tvshow";
   let season = 1;
   let episode = 1;
-  let imdbId = "tt0121955";
+  let imdbId = "";
+  let language = "en";
+  let source = "all";
+  let hearingImpaired = null;
   let contentTitle = "";
   let searchResults = [];
   let isLoading = false;
@@ -58,7 +61,7 @@
   }
 
   // Add function to handle clicking outside
-function handleClickOutside(event) {
+  function handleClickOutside(event) {
     if (!browser) return; // Early return if not in browser
 
     const searchElement = document.getElementById("content-title");
@@ -74,15 +77,16 @@ function handleClickOutside(event) {
     }
   }
 
-
   onMount(() => {
-    if (browser) { // Only add event listener if in browser
+    if (browser) {
+      // Only add event listener if in browser
       document.addEventListener("click", handleClickOutside);
     }
   });
 
   onDestroy(() => {
-    if (browser) { // Only remove event listener if in browser
+    if (browser) {
+      // Only remove event listener if in browser
       document.removeEventListener("click", handleClickOutside);
     }
   });
@@ -90,7 +94,7 @@ function handleClickOutside(event) {
   $: searchUrl =
     selectedContentType === "movie" ?
       `/search?id=${imdbId}&tmdb=${selectedTmdbId}`
-    : `/search?id=${imdbId}&tmdb=${selectedTmdbId}&season=${season}&episode=${episode}`;
+    : `/search?id=${imdbId}&tmdb=${selectedTmdbId}&season=${season}&episode=${episode}&language=${language}`;
 </script>
 
 <div>
@@ -111,81 +115,133 @@ function handleClickOutside(event) {
       <div class="bg-mono-secondary shadow-lg p-7 rounded-md flex flex-col gap-4 max-w-xl mx-auto">
         <span>
           <h3 class="font-semibold text-type-subheader text-2xl mb-1">Subtitles for Free</h3>
-          <p class="text-type-secondary text-sm">
-            Search and download free subtitles for movies and TV shows instantly. Enter the title, select the content type, and search the Wyzie API for any available subtitles.
+          <p class="text-type-dimmed text-sm">
+            Search and download free subtitles for movies and TV shows instantly. Enter the title,
+            select the content type, and search the Wyzie API for any available subtitles.
           </p>
         </span>
 
-        <div class="flex flex-col gap-2">
-          <label
-            for="content-type"
-            class="text-sm text-type-dimmed">Media Type:</label>
-          <select
-            id="content-type"
-            class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md"
-            bind:value={selectedContentType}>
-            <option value="movie">Movie</option>
-            <option value="tvshow">TV Show</option>
-          </select>
+        <div class="flex justify-center items-center gap-4">
+          <div class="flex flex-col gap-2">
+            <label
+              for="content-type"
+              class="text-sm text-type-secondary">Media Type:</label>
+            <select
+              id="content-type"
+              class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md w-32"
+              bind:value={selectedContentType}>
+              <option value="movie">Movie</option>
+              <option value="tvshow">TV Show</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1 relative w-full">
+            <label
+              for="content-title"
+              class="text-sm text-type-secondary">
+              {selectedContentType === "movie" ? "Movie" : "TV Show"} Title:
+            </label>
+            <input
+              type="text"
+              id="content-title"
+              bind:value={contentTitle}
+              on:focus={() => (isSearchFocused = true)}
+              class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md" />
+
+            {#if isLoading}
+              <div class="absolute right-3 top-[38px]">
+                <div
+                  class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin">
+                </div>
+              </div>
+            {/if}
+
+            {#if searchResults.length > 0 && isSearchFocused}
+              <div
+                id="search-results"
+                class="absolute top-full left-0 right-0 bg-mono-background mt-2 py-1 rounded-md shadow-xl z-10">
+                {#each searchResults as result}
+                  <button
+                    class="w-full text-left p-2 hover:bg-mono-accent2 flex items-center gap-3 transition duration-200"
+                    on:click={() => selectMedia(result)}>
+                    {#if result.poster_path}
+                      <img
+                        src={`https://image.tmdb.org/t/p/w92${result.poster_path}`}
+                        alt={result.title || result.name}
+                        class="w-12 h-auto rounded" />
+                    {:else}
+                      <div class="w-12 h-[64px] bg-mono-secondary rounded"></div>
+                    {/if}
+                    <div>
+                      <p class="text-type-subheader">{result.title || result.name}</p>
+                      <p class="text-sm text-type-secondary">
+                        {result.release_date?.substring(0, 4) ||
+                          result.first_air_date?.substring(0, 4) ||
+                          "Unknown year"}
+                      </p>
+                    </div>
+                  </button>
+                {/each}
+              </div>
+            {/if}
+          </div>
         </div>
 
-        <div class="flex flex-col gap-1 relative">
-          <label
-            for="content-title"
-            class="text-sm text-type-dimmed">
-            {selectedContentType === "movie" ? "Movie" : "TV Show"} Title:
-          </label>
-          <input
-            type="text"
-            id="content-title"
-            bind:value={contentTitle}
-            on:focus={() => (isSearchFocused = true)}
-            class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md" />
-
-          {#if isLoading}
-            <div class="absolute right-3 top-[38px]">
-              <div
-                class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin">
-              </div>
-            </div>
-          {/if}
-
-          {#if searchResults.length > 0 && isSearchFocused}
-            <div
-              id="search-results"
-              class="absolute top-full left-0 right-0 bg-mono-lightaccent mt-2 py-1 rounded-md shadow-xl z-10">
-              {#each searchResults as result}
-                <button
-                  class="w-full text-left p-2 hover:bg-mono-accent flex items-center gap-3"
-                  on:click={() => selectMedia(result)}>
-                  {#if result.poster_path}
-                    <img
-                      src={`https://image.tmdb.org/t/p/w92${result.poster_path}`}
-                      alt={result.title || result.name}
-                      class="w-12 h-auto rounded" />
-                  {:else}
-                    <div class="w-12 h-[64px] bg-mono-secondary rounded"></div>
-                  {/if}
-                  <div>
-                    <p class="text-type-subheader">{result.title || result.name}</p>
-                    <p class="text-sm text-type-secondary">
-                      {result.release_date?.substring(0, 4) ||
-                        result.first_air_date?.substring(0, 4) ||
-                        "Unknown year"}
-                    </p>
-                  </div>
-                </button>
-              {/each}
-            </div>
-          {/if}
+        <div class="flex justify-between items-center">
+          <div class="flex flex-col gap-1">
+            <label
+              for="language"
+              class="text-sm text-type-secondary">Language:</label>
+            <select
+              id="language"
+              class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md"
+              bind:value={language}>
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+              <option value="it">Italian</option>
+              <option value="pt">Portuguese</option>
+              <option value="ru">Russian</option>
+              <option value="ja">Japanese</option>
+              <option value="zh">Chinese</option>
+              <option value="ar">Arabic</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label
+              for="source"
+              class="text-sm text-type-secondary">Source:</label>
+            <select
+              id="source"
+              class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md"
+              bind:value={source}>
+              <option value="all">All Sources</option>
+              <option value="opensubtitles">Open Subtitles</option>
+              <option value="subdl">Sub DL</option>
+              <option value="subf2m">SubF2M</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label
+              for="hearing-impaired"
+              class="text-sm text-type-secondary">Hearing Impaired:</label>
+            <select
+              id="source"
+              class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md"
+              bind:value={hearingImpaired}>
+              <option value="opensubtitles">Only show</option>
+              <option value="subdl">Exclude</option>
+            </select>
+          </div>
         </div>
 
         {#if selectedContentType === "tvshow"}
-          <div class="flex justify-between gap-3">
+          <div class="flex justify-between items-center">
             <div class="flex flex-col gap-1">
               <label
                 for="season"
-                class="text-sm text-type-dimmed">Season:</label>
+                class="text-sm text-type-secondary">Season:</label>
               <input
                 type="number"
                 id="season"
@@ -196,7 +252,7 @@ function handleClickOutside(event) {
             <div class="flex flex-col gap-1">
               <label
                 for="episode"
-                class="text-sm text-type-dimmed">Episode:</label>
+                class="text-sm text-type-secondary">Episode:</label>
               <input
                 type="number"
                 id="episode"
@@ -206,14 +262,12 @@ function handleClickOutside(event) {
             </div>
           </div>
         {/if}
-
-        <a
-          href={searchUrl}
+        <button
           class="mt-2 inline-flex justify-center py-2 px-4 shadow-md text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           class:pointer-events-none={!selectedTmdbId}
           class:opacity-50={!selectedTmdbId}>
           Search {selectedContentType === "movie" ? "Movie" : "TV Show"}
-        </a>
+        </button>
       </div>
     </main>
 
