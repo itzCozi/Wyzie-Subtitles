@@ -22,6 +22,51 @@
   let isTrendingMoviesLoading = false;
   let isTrendingShowsLoading = false;
 
+  // Animation variables for adjective rotation
+  let adjectiveIndex = 0;
+  let adjectives = ["Instantly", "Effortlessly", "Reliably", "Safely"];
+  let fadeState = "in"; // 'in' or 'out'
+  let adjectiveInterval;
+
+  // Function to rotate through adjectives with fade effect
+  function rotateAdjectives() {
+    // Start fade out
+    fadeState = "out";
+
+    setTimeout(() => {
+      // Change the adjective while it's faded out
+      adjectiveIndex = (adjectiveIndex + 1) % adjectives.length;
+      // Start fade in
+      fadeState = "in";
+    }, 500); // Half the total transition time
+  }
+
+  // ...existing code...
+
+  onMount(() => {
+    if (browser) {
+      // Only add event listener if in browser
+      document.addEventListener("click", handleClickOutside);
+
+      // Fetch trending content on page load
+      fetchTrendingMovies();
+      fetchTrendingShows();
+
+      // Start adjective rotation
+      adjectiveInterval = setInterval(rotateAdjectives, 8000);
+    }
+  });
+
+  onDestroy(() => {
+    if (browser) {
+      // Only remove event listener if in browser
+      document.removeEventListener("click", handleClickOutside);
+
+      // Clear the interval when component is destroyed
+      clearInterval(adjectiveInterval);
+    }
+  });
+
   function debounce(func, timeout = 300) {
     let timer;
     return (...args) => {
@@ -172,14 +217,21 @@
 
         <main class="container mx-auto px-4 py-8 md:py-12">
       <div class="max-w-2xl mx-auto text-center">
-        <h1 class="text-3xl md:text-5xl font-bold text-type-emphasized mb-4 md:mb-6 leading-tight">
-          Find Perfect Subtitles <span class="text-primary-600">Instantly</span>
-        </h1>
-        <p class="text-type-dimmed text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-          Search and download free subtitles for your favorite movies and TV shows. Simple, fast,
-          and completely free.
-        </p>
-      </div>
+  <h1 class="flex flex-col text-3xl md:text-5xl font-bold text-type-emphasized mb-4 md:mb-6 leading-tight">
+    Find Perfect Subtitles
+    <span
+            class="text-primary-600 transition-opacity duration-8000"
+      class:opacity-0={fadeState === "out"}
+      class:opacity-100={fadeState === "in"}
+    >
+      {adjectives[adjectiveIndex]}
+    </span>
+  </h1>
+  <p class="text-type-dimmed text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+    Search and download free subtitles for your favorite movies and TV shows. Simple, fast,
+    and completely free.
+  </p>
+</div>
 
       <div
               class="bg-mono-secondary rounded-xl shadow-md max-w-xl mx-auto overflow-hidden border border-mono-accent mt-6 md:mt-8">

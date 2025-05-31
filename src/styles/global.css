@@ -5,22 +5,18 @@
 :root ::-webkit-scrollbar {
   width: 8px;
   background-color: transparent;
+  border-left: 1px solid #bbbbbb;
 }
 
 :root ::-webkit-scrollbar-thumb {
-  background-color: #505050;
+  background-color: transparent;
   cursor: pointer;
-}
-
-:root {
-  --background-color: #f0f0f0;
-  font-family: "open sans";
+  background-color: #bbbbbb;
 }
 
 html,
 body {
   scroll-behavior: smooth;
-  background-color: var(--background-color);
   color: #404040;
   font-family: "open sans";
 }
