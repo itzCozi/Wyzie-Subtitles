@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { browser } from "$app/environment";
 
-  let selectedContentType = "tvshow";
+  let selectedContentType = "movie";
   let season = 1;
   let episode = 1;
   let imdbId = "";
@@ -202,7 +202,7 @@
           href="/"
           class="flex items-center"
           title="Wyzie Subtitles">
-          <span class="text-3xl font-bold text-primary-700">
+          <span class="text-4xl font-bold text-primary-700">
             Wyzie <span class="text-type-emphasized font-semibold">Subtitles</span>
           </span>
         </a>
@@ -215,35 +215,114 @@
       </div>
     </header>
 
-        <main class="container mx-auto px-4 py-8 md:py-12">
+    <main class="container mx-auto px-4 py-8 md:py-12">
       <div class="max-w-2xl mx-auto text-center">
-  <h1 class="flex flex-col text-3xl md:text-5xl font-bold text-type-emphasized mb-4 md:mb-6 leading-tight">
-    Find Perfect Subtitles
-    <span
-            class="text-primary-600 transition-opacity duration-8000"
-      class:opacity-0={fadeState === "out"}
-      class:opacity-100={fadeState === "in"}
-    >
-      {adjectives[adjectiveIndex]}
-    </span>
-  </h1>
-  <p class="text-type-dimmed text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-    Search and download free subtitles for your favorite movies and TV shows. Simple, fast,
-    and completely free.
-  </p>
-</div>
+        <h1
+          class="flex flex-col text-3xl md:text-5xl font-semibold text-type-emphasized mb-4 md:mb-6 leading-tight">
+          Find Perfect Subtitles
+          <span
+            class="text-primary-600 font-bold transition-opacity duration-8000"
+            class:opacity-0={fadeState === "out"}
+            class:opacity-100={fadeState === "in"}>
+            {adjectives[adjectiveIndex]}
+          </span>
+        </h1>
+        <p class="text-type-dimmed text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+          Search and download free subtitles for your favorite movies and TV shows. Simple, fast,
+          and completely free.
+        </p>
+      </div>
 
       <div
-              class="bg-mono-secondary rounded-xl shadow-md max-w-xl mx-auto overflow-hidden border border-mono-accent mt-6 md:mt-8">
-              <div class="px-4 py-5 md:p-6">
-                <!-- Main search field with enhanced styling -->
-                <div class="relative mb-5 md:mb-6">
+        class="bg-mono-secondary rounded-xl shadow-md max-w-xl mx-auto overflow-hidden border border-mono-accent mt-6 md:mt-8">
+        <div class="px-4 py-5 md:p-6">
+          <!-- Main search field with enhanced styling -->
+          <div class="relative mb-5 md:mb-6">
+            <div
+              class="flex items-center border-2 rounded-lg border-primary-200 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 transition-all py-2 px-3">
+              <div class="flex-shrink-0 mr-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 text-primary-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+              <input
+                type="text"
+                id="content-title"
+                placeholder={`Search for ${selectedContentType === "movie" ? "a movie" : "a TV show"} title...`}
+                bind:value={contentTitle}
+                on:focus={() => (isSearchFocused = true)}
+                class="w-full py-1 bg-transparent text-type-emphasized text-base md:text-lg focus:outline-none placeholder:text-type-secondary" />
+              {#if isLoading}
+                <div class="w-5 h-5 ml-1">
                   <div
-                    class="flex items-center border-2 rounded-lg border-primary-200 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 transition-all py-2 px-3">
-                    <div class="flex-shrink-0 mr-3">
+                    class="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin">
+                  </div>
+                </div>
+              {/if}
+            </div>
+
+            <!-- Search results dropdown with enhanced styling -->
+            {#if searchResults.length > 0 && isSearchFocused}
+              <div
+                id="search-results"
+                class="absolute top-full left-0 right-0 bg-mono-secondary mt-1 rounded-lg shadow-xl z-10 overflow-hidden max-h-[60vh] overflow-y-auto">
+                {#each searchResults as result}
+                  <button
+                    class="w-full text-left p-3 hover:bg-mono-accent flex items-center gap-4 transition duration-200"
+                    on:click={() => selectMedia(result)}>
+                    {#if result.poster_path}
+                      <img
+                        src={`https://image.tmdb.org/t/p/w92${result.poster_path}`}
+                        alt={result.title || result.name}
+                        class="w-16 h-24 object-cover rounded shadow-sm" />
+                    {/if}
+                    <div>
+                      <p class="text-type-emphasized font-medium text-lg">
+                        {result.title || result.name}
+                      </p>
+                      <p class="text-sm text-type-secondary">
+                        {result.release_date?.substring(0, 4) ||
+                          result.first_air_date?.substring(0, 4) ||
+                          "Unknown year"}
+                      </p>
+                      <p class="text-xs text-type-footer mt-1 line-clamp-2">
+                        {result.overview || "No description available"}
+                      </p>
+                    </div>
+                  </button>
+                {/each}
+              </div>
+            {/if}
+          </div>
+
+          <!-- Form options with improved responsive layout using flexbox -->
+          <div class="flex flex-col md:grid md:grid-cols-2 gap-6">
+            <!-- Left column -->
+            <div class="flex flex-col space-y-6">
+              <!-- Media Type -->
+              <div>
+                <label class="block text-type-secondary text-sm font-medium mb-1">Media Type</label>
+                <div class="flex rounded-lg overflow-hidden shadow-sm">
+                  <button
+                    class="flex-1 py-2.5 px-4 transition-colors"
+                    class:bg-primary-600={selectedContentType === "movie"}
+                    class:text-white={selectedContentType === "movie"}
+                    class:bg-mono-accent={selectedContentType !== "movie"}
+                    class:text-type-dimmed={selectedContentType !== "movie"}
+                    on:click={() => (selectedContentType = "movie")}>
+                    <span class="flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5 text-primary-400"
+                        class="h-4 w-4 mr-1.5"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -251,279 +330,197 @@
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                          d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
+                        ></path>
                       </svg>
-                    </div>
-                    <input
-                      type="text"
-                      id="content-title"
-                      placeholder={`Search for ${selectedContentType === "movie" ? "a movie" : "a TV show"} title...`}
-                      bind:value={contentTitle}
-                      on:focus={() => (isSearchFocused = true)}
-                      class="w-full py-1 bg-transparent text-type-emphasized text-base md:text-lg focus:outline-none placeholder:text-type-secondary" />
-                    {#if isLoading}
-                      <div class="w-5 h-5 ml-1">
-                        <div
-                          class="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin">
-                        </div>
-                      </div>
-                    {/if}
-                  </div>
-
-                  <!-- Search results dropdown with enhanced styling -->
-                  {#if searchResults.length > 0 && isSearchFocused}
-                    <div
-                      id="search-results"
-                      class="absolute top-full left-0 right-0 bg-mono-secondary mt-1 rounded-lg shadow-xl z-10 overflow-hidden max-h-[60vh] overflow-y-auto">
-                      {#each searchResults as result}
-                        <button
-                          class="w-full text-left p-3 hover:bg-mono-accent flex items-center gap-4 transition duration-200"
-                          on:click={() => selectMedia(result)}>
-                          {#if result.poster_path}
-                            <img
-                              src={`https://image.tmdb.org/t/p/w92${result.poster_path}`}
-                              alt={result.title || result.name}
-                              class="w-16 h-24 object-cover rounded shadow-sm" />
-                          {/if}
-                          <div>
-                            <p class="text-type-emphasized font-medium text-lg">
-                              {result.title || result.name}
-                            </p>
-                            <p class="text-sm text-type-secondary">
-                              {result.release_date?.substring(0, 4) ||
-                                result.first_air_date?.substring(0, 4) ||
-                                "Unknown year"}
-                            </p>
-                            <p class="text-xs text-type-footer mt-1 line-clamp-2">
-                              {result.overview || "No description available"}
-                            </p>
-                          </div>
-                        </button>
-                      {/each}
-                    </div>
-                  {/if}
-                </div>
-
-                <!-- Form options with improved responsive layout using flexbox -->
-                <div class="flex flex-col md:grid md:grid-cols-2 gap-6">
-                  <!-- Left column -->
-                  <div class="flex flex-col space-y-6">
-                    <!-- Media Type -->
-                    <div>
-                      <label class="block text-type-secondary text-sm font-medium mb-2">Media Type</label>
-                      <div class="flex rounded-lg overflow-hidden shadow-sm">
-                        <button
-                          class="flex-1 py-2.5 px-4 transition-colors"
-                          class:bg-primary-600={selectedContentType === "movie"}
-                          class:text-white={selectedContentType === "movie"}
-                          class:bg-mono-accent={selectedContentType !== "movie"}
-                          class:text-type-dimmed={selectedContentType !== "movie"}
-                          on:click={() => (selectedContentType = "movie")}>
-                          <span class="flex items-center justify-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-4 w-4 mr-1.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor">
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
-                              ></path>
-                            </svg>
-                            Movie
-                          </span>
-                        </button>
-                        <button
-                          class="flex-1 py-2.5 px-4 transition-colors"
-                          class:bg-primary-600={selectedContentType === "tvshow"}
-                          class:text-white={selectedContentType === "tvshow"}
-                          class:bg-mono-accent={selectedContentType !== "tvshow"}
-                          class:text-type-dimmed={selectedContentType !== "tvshow"}
-                          on:click={() => (selectedContentType = "tvshow")}>
-                          <span class="flex items-center justify-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-4 w-4 mr-1.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor">
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                              ></path>
-                            </svg>
-                            TV Show
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- Language -->
-                    <div>
-                      <label
-                        for="language"
-                        class="block text-type-secondary text-sm font-medium mb-2">Language</label>
-                      <div class="relative">
-                        <select
-                          id="language"
-                          class="p-2.5 rounded-lg bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm w-full appearance-none pr-10"
-                          bind:value={language}>
-                          <option value="en">English</option>
-                          <option value="es">Spanish</option>
-                          <option value="fr">French</option>
-                          <option value="de">German</option>
-                          <option value="it">Italian</option>
-                          <option value="pt">Portuguese</option>
-                          <option value="ru">Russian</option>
-                          <option value="ja">Japanese</option>
-                          <option value="zh">Chinese</option>
-                          <option value="ar">Arabic</option>
-                        </select>
-                        <div
-                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-type-secondary">
-                          <svg
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Right column -->
-                  <div class="flex flex-col space-y-6">
-                    <!-- Hearing Impaired -->
-                    <div>
-                      <label
-                        for="hearing-impaired"
-                        class="block text-type-secondary text-sm font-medium mb-2"
-                        >Hearing Impaired</label>
-                      <div class="relative">
-                        <select
-                          id="hearing-impaired"
-                          class="p-2.5 rounded-lg bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm w-full appearance-none pr-10"
-                          bind:value={hearingImpaired}>
-                          <option value="true">Only show</option>
-                          <option value="false">Exclude</option>
-                          <option value="indifferent">Show both</option>
-                        </select>
-                        <div
-                          class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-type-secondary">
-                          <svg
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- TV Show specific fields -->
-                    {#if selectedContentType === "tvshow"}
-                      <div class="flex flex-row space-x-4">
-                        <div class="flex-1">
-                          <label
-                            for="season"
-                            class="block text-type-secondary text-sm font-medium mb-2">Season</label>
-                          <input
-                            type="number"
-                            id="season"
-                            min="1"
-                            bind:value={season}
-                            class="p-2.5 rounded-lg w-full bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm" />
-                        </div>
-                        <div class="flex-1">
-                          <label
-                            for="episode"
-                            class="block text-type-secondary text-sm font-medium mb-2">Episode</label>
-                          <input
-                            type="number"
-                            id="episode"
-                            min="1"
-                            bind:value={episode}
-                            class="p-2.5 rounded-lg w-full bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm" />
-                        </div>
-                      </div>
-                    {/if}
-                  </div>
-                </div>
-
-                <!-- Source field - full width across columns -->
-                <div class="mt-5">
-                  <label
-                    for="source"
-                    class="block text-type-secondary text-sm font-medium mb-2">Source</label>
-                  <div class="relative">
-                    <select
-                      id="source"
-                      class="p-2.5 rounded-lg bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm w-full appearance-none pr-10"
-                      bind:value={source}>
-                      <option value="all">All Sources</option>
-                      <option value="opensubtitles">OpenSubtitles</option>
-                      <option value="subdl">SubDL</option>
-                      <option value="subf2m">SubF2M</option>
-                    </select>
-                    <div
-                      class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-type-secondary">
+                      Movie
+                    </span>
+                  </button>
+                  <button
+                    class="flex-1 py-2.5 px-4 transition-colors"
+                    class:bg-primary-600={selectedContentType === "tvshow"}
+                    class:text-white={selectedContentType === "tvshow"}
+                    class:bg-mono-accent={selectedContentType !== "tvshow"}
+                    class:text-type-dimmed={selectedContentType !== "tvshow"}
+                    on:click={() => (selectedContentType = "tvshow")}>
+                    <span class="flex items-center justify-center">
                       <svg
-                        class="w-4 h-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 mr-1.5"
                         fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24">
+                        viewBox="0 0 24 24"
+                        stroke="currentColor">
                         <path
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
-                          d="M19 9l-7 7-7-7"></path>
+                          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        ></path>
                       </svg>
-                    </div>
+                      TV Show
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right column -->
+            <div class="flex flex-col space-y-6">
+              <!-- Hearing Impaired -->
+              <div>
+                <label
+                  for="hearing-impaired"
+                  class="block text-type-secondary text-sm font-medium mb-1"
+                  >Hearing Impaired</label>
+                <div class="relative">
+                  <select
+                    id="hearing-impaired"
+                    class="p-2.5 rounded-lg bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm w-full appearance-none pr-10"
+                    bind:value={hearingImpaired}>
+                    <option value="true">Only show</option>
+                    <option value="false">Exclude</option>
+                    <option value="indifferent">Show both</option>
+                  </select>
+                  <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-type-secondary">
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"></path>
+                    </svg>
                   </div>
                 </div>
               </div>
-
-
-              <!-- Search button with improved styling -->
-              <div class="px-4 pb-6 md:px-6 md:pb-8 mt-5">
-                <a
-                  href={searchUrl}
-                  class="w-full inline-flex justify-center items-center py-3 shadow-md text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  class:pointer-events-none={!selectedTmdbId}
-                  class:opacity-50={!selectedTmdbId}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                  </svg>
-                  Find Subtitles
-                </a>
-              </div>
-</div>
             </div>
+          </div>
+
+          <div>
+            {#if selectedContentType === "tvshow"}
+ <div class="flex justify-between items-center mt-3">
+  <div>
+    <label
+      for="season"
+      class="block text-type-secondary text-sm font-medium mb-1">Season</label>
+    <input
+      type="number"
+      id="season"
+      min="1"
+      bind:value={season}
+      class="p-2 rounded-lg w-24 bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm" />
+  </div>
+  <div>
+    <label
+      for="episode"
+      class="block text-type-secondary text-sm font-medium mb-1">Episode</label>
+    <input
+      type="number"
+      id="episode"
+      min="1"
+      bind:value={episode}
+      class="p-2 rounded-lg w-24 bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm" />
+  </div>
+</div>
+            {/if}
+            <label
+              for="language"
+              class="block text-type-secondary text-sm font-medium mt-3 mb-1">Language</label>
+            <div
+              class="relative"
+              class:w-full={selectedContentType === "movie"}>
+              <select
+                id="language"
+                class="p-2.5 rounded-lg bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm w-full appearance-none pr-10"
+                bind:value={language}>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="ja">Japanese</option>
+                <option value="zh">Chinese</option>
+                <option value="ar">Arabic</option>
+              </select>
+              <div
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-type-secondary">
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <label
+              for="source"
+              class="block text-type-secondary text-sm font-medium mb-1">Source</label>
+            <div class="relative">
+              <select
+                id="source"
+                class="p-2.5 rounded-lg bg-mono-accent text-type-darker focus:outline-none focus:ring-2 focus:ring-primary-100 shadow-sm w-full appearance-none pr-10"
+                bind:value={source}>
+                <option value="all">All Sources</option>
+                <option value="opensubtitles">OpenSubtitles</option>
+                <option value="subdl">SubDL</option>
+                <option value="subf2m">SubF2M</option>
+              </select>
+              <div
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-type-secondary">
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search button with improved styling -->
+        <div class="px-4 pb-6 md:px-6 md:pb-8 mt-4">
+          <a
+            href={searchUrl}
+            class="w-full inline-flex justify-center items-center py-3 shadow-md text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            class:pointer-events-none={!selectedTmdbId}
+            class:opacity-50={!selectedTmdbId}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Find Subtitles
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
 
   <div class="max-w-6xl mx-auto mt-20 px-4">
     <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
@@ -605,8 +602,7 @@
 
   <!-- Trending Movies Section -->
   <div class="max-w-6xl mx-auto mt-16 px-4 py-6">
-      <h3 class="text-2xl font-bold text-type-emphasized mb-6">Trending Movies This Week</h3>
-
+    <h3 class="text-2xl font-bold text-type-emphasized mb-6">Trending Movies This Week</h3>
 
     {#if isTrendingMoviesLoading}
       <div class="flex justify-center my-12">
@@ -621,7 +617,7 @@
             class="group cursor-pointer"
             on:click={() => selectTrendingItem(movie)}>
             <div
-              class="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:translate-y-[-4px]">
+              class="relative rounded-lg overflow-hidden shadow-md transition-all duration-600 group-hover:shadow-xl group-hover:translate-y-[-5px]">
               {#if movie.poster_path}
                 <img
                   src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
@@ -634,14 +630,6 @@
                   No Image Available
                 </div>
               {/if}
-
-              <!-- Hover overlay -->
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                <div class="p-3 w-full">
-                  <p class="text-white font-medium text-center">{movie.title}</p>
-                </div>
-              </div>
 
               <!-- Rating badge -->
               <div
@@ -663,8 +651,7 @@
 
   <!-- Trending TV Shows Section -->
   <div class="max-w-6xl mx-auto mt-16 px-4 py-6">
-      <h3 class="text-2xl font-bold text-type-emphasized mb-6">Trending TV Shows This Week</h3>
-
+    <h3 class="text-2xl font-bold text-type-emphasized mb-6">Trending TV Shows This Week</h3>
 
     {#if isTrendingShowsLoading}
       <div class="flex justify-center my-12">
@@ -679,7 +666,7 @@
             class="group cursor-pointer"
             on:click={() => selectTrendingItem(show)}>
             <div
-              class="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:translate-y-[-4px]">
+              class="relative rounded-lg overflow-hidden shadow-md transition-all duration-600 group-hover:shadow-xl group-hover:translate-y-[-5px]">
               {#if show.poster_path}
                 <img
                   src={`https://image.tmdb.org/t/p/w342${show.poster_path}`}
@@ -692,14 +679,6 @@
                   No Image Available
                 </div>
               {/if}
-
-              <!-- Hover overlay -->
-              <div
-                class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                <div class="p-3 w-full">
-                  <p class="text-white font-medium text-center">{show.name}</p>
-                </div>
-              </div>
 
               <!-- Rating badge -->
               <div
@@ -722,8 +701,8 @@
     <div class="container mx-auto">
       <div class="flex flex-col md:flex-row justify-between items-center">
         <div class="mb-8 md:mb-0">
-          <h2 class="text-xl font-semibold text-primary-700 mb-1">
-            Wyzie <span class="text-type-emphasized">Subtitles</span>
+          <h2 class="text-xl font-bold text-primary-700 mb-1">
+            Wyzie <span class="text-type-emphasized font-semibold">Subtitles</span>
           </h2>
           <p class="text-sm text-type-footer mt-1">
             The easiest way to find subtitles for any media.
@@ -773,7 +752,7 @@
       </div>
 
       <div class="text-center mt-6 pt-6 border-t border-gray-100">
-        <p class="text-type-footer text-sm mb-2">
+        <p class="text-type-footer text-sm mb-1">
           Created by <a
             href="https://github.com/itzcozi"
             class="font-semibold transition-colors hover:text-primary-600">BadDeveloper</a> with 💙
