@@ -15,6 +15,7 @@
   let selectedTmdbId = null;
   let tmdbApiKey = "9867f3f6a5e78a2639afb0e2ffc0a311";
   let isSearchFocused = false;
+  let directTmdbId = "";
 
   function debounce(func, timeout = 300) {
     let timer;
@@ -51,6 +52,32 @@
 
   $: if (contentTitle) {
     searchTmdb();
+  }
+
+  async function searchByTmdbId() {
+    if (!directTmdbId.trim()) return;
+    
+    isLoading = true;
+    const searchType = selectedContentType === "movie" ? "movie" : "tv";
+    const url = `https://api.themoviedb.org/3/${searchType}/${directTmdbId}?api_key=${tmdbApiKey}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.id) {
+        contentTitle = data.title || data.name;
+        selectedTmdbId = data.id;
+        searchResults = [];
+      }
+    } catch (error) {
+      console.error("Error searching TMDB by ID:", error);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  $: if (directTmdbId) {
+    searchByTmdbId();
   }
 
   function selectMedia(media) {
@@ -136,17 +163,40 @@
           </div>
 
           <div class="flex flex-col gap-1 relative w-full">
-            <label
-              for="content-title"
-              class="text-sm text-type-secondary">
-              {selectedContentType === "movie" ? "Movie" : "TV Show"} Title:
-            </label>
-            <input
-              type="text"
-              id="content-title"
-              bind:value={contentTitle}
-              on:focus={() => (isSearchFocused = true)}
-              class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md" />
+            <div class="flex justify-between items-center mb-1">
+              <label
+                for="content-title"
+                class="text-sm text-type-secondary">
+                {selectedContentType === "movie" ? "Movie" : "TV Show"} Title:
+              </label>
+              <label
+                for="direct-tmdb-id"
+                class="text-sm text-type-secondary">
+                Or enter TMDB ID:
+              </label>
+            </div>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="content-title"
+                bind:value={contentTitle}
+                on:focus={() => {
+                  isSearchFocused = true;
+                  directTmdbId = ""; // Clear TMDB ID when focusing on title search
+                }}
+                class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md flex-grow" />
+              <input
+                type="text"
+                id="direct-tmdb-id"
+                placeholder="TMDB ID"
+                bind:value={directTmdbId}
+                on:focus={() => {
+                  isSearchFocused = false;
+                  contentTitle = ""; // Clear title when focusing on TMDB ID
+                  searchResults = [];
+                }}
+                class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md w-32" />
+            </div>
 
             {#if isLoading}
               <div class="absolute right-3 top-[38px]">
