@@ -1,9 +1,8 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import { debounce, searchTmdb, searchTmdbById } from '../lib/tmdb';
-  
+
   export let contentTitle = '';
-  export let directTmdbId = '';
   export let isLoading = false;
   export let searchResults = [];
   export let isSearchFocused = false;
@@ -19,36 +18,52 @@
       return;
     }
 
-    isLoading = true;
-    const searchType = selectedContentType === "movie" ? "movie" : "tv";
-    searchResults = await searchTmdb(query, searchType, tmdbApiKey);
-    isLoading = false;
+    // Check if the input is potentially an ID
+    const tmdbIdPattern = /^(t?\d{5,10})$/; // TMDB IDs are numeric
+    const imdbIdPattern = /^(tt\d{7,8})$/i; // IMDb IDs start with 'tt' followed by 7-8 digits
+
+    if (tmdbIdPattern.test(query) || imdbIdPattern.test(query)) {
+      await handleIdSearch(query);
+    } else {
+      // Regular title search
+      isLoading = true;
+      const searchType = selectedContentType === "movie" ? "movie" : "tv";
+      searchResults = await searchTmdb(query, searchType, tmdbApiKey);
+      isLoading = false;
+    }
   });
 
-  async function handleTmdbIdSearch() {
-    if (!directTmdbId.trim()) return;
-    
+  async function handleIdSearch(id) {
     isLoading = true;
     const searchType = selectedContentType === "movie" ? "movie" : "tv";
-    const result = await searchTmdbById(directTmdbId, searchType, tmdbApiKey);
-    
+
+    // Check if it's an IMDb ID (starts with tt)
+    if (id.toLowerCase().startsWith('tt')) {
+      console.log("IMDb ID search not yet implemented");
+      isLoading = false;
+      return;
+    }
+
+    // TMDB ID search
+    const result = await searchTmdbById(id, searchType, tmdbApiKey);
+
     if (result) {
       contentTitle = result.title;
-      dispatch('selectMedia', { 
-        id: result.id, 
+      dispatch('selectMedia', {
+        id: result.id,
         title: result.title,
         imdbId: result.imdb_id
       });
       searchResults = [];
     }
-    
+
     isLoading = false;
   }
 
   function selectMedia(media) {
     contentTitle = media.title || media.name;
-    dispatch('selectMedia', { 
-      id: media.id, 
+    dispatch('selectMedia', {
+      id: media.id,
       title: media.title || media.name,
       imdbId: media.external_ids?.imdb_id
     });
@@ -59,51 +74,23 @@
   $: if (contentTitle) {
     debouncedSearch(contentTitle);
   }
-
-  $: if (directTmdbId) {
-    handleTmdbIdSearch();
-  }
 </script>
 
 <div class="flex flex-col gap-1 relative w-full">
-  <div class="flex justify-between items-center mb-1">
-    <label
-      for="content-title"
-      class="text-sm text-type-secondary">
-      {selectedContentType === "movie" ? "Movie" : "TV Show"} Title:
-    </label>
-    <label
-      for="direct-tmdb-id"
-      class="text-sm text-type-secondary">
-      Or enter TMDB ID:
-    </label>
-  </div>
-  <div class="flex gap-2">
-    <input
-      type="text"
-      id="content-title"
-      bind:value={contentTitle}
-      on:focus={() => {
-        isSearchFocused = true;
-      }}
-      on:input={() => {
-        directTmdbId = "";
-      }}
-      class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md flex-grow" />
-    <input
-      type="text"
-      id="direct-tmdb-id"
-      placeholder="TMDB ID"
-      bind:value={directTmdbId}
-      on:focus={() => {
-        isSearchFocused = false;
-        searchResults = [];
-      }}
-      on:input={() => {
-        contentTitle = "";
-      }}
-      class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md w-32" />
-  </div>
+  <label
+    for="content-search"
+    class="text-sm text-type-secondary mb-1">
+    Search by {selectedContentType === "movie" ? "Movie" : "TV Show"} Title or ID (TMDB/IMDb):
+  </label>
+  <input
+    type="text"
+    id="content-search"
+    bind:value={contentTitle}
+    on:focus={() => {
+      isSearchFocused = true;
+    }}
+    placeholder="Enter title or ID (e.g. 12345 for TMDB, tt1234567 for IMDb)"
+    class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md w-full" />
 
   {#if isLoading}
     <div class="absolute right-3 top-[38px]">
@@ -141,4 +128,4 @@
       {/each}
     </div>
   {/if}
-</div> 
+</div>
