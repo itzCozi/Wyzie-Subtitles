@@ -20,6 +20,9 @@ importers:
       vite-plugin-svelte-monorepo:
         specifier: github:sveltejs/vite-plugin-svelte
         version: https://codeload.github.com/sveltejs/vite-plugin-svelte/tar.gz/6e338f4a293dd4a1ef29a96f9362f9a7b36524e4
+      wyzie-lib:
+        specifier: ^2.2.4
+        version: 2.2.4
     devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^3.0.8
@@ -1311,6 +1314,9 @@ packages:
     resolution: {integrity: sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==}
     engines: {node: '>=12'}
 
+  wyzie-lib@2.2.4:
+    resolution: {integrity: sha512-chw9KS1ljOGiJfxQizXpH++9p3sZ9FN34hVzWWZUTB/f5nKPqwxKRlIV8NCl7gmHZTAdrZrJVoldpG3qTdPkDg==}
+
   yaml@2.7.1:
     resolution: {integrity: sha512-10ULxpnOCQXxJvBgxsn9ptjq6uviG/htZKk9veJGhlqn3w/DxQ631zFF+nlQXLwmImeS5amR2dl2U8sg6U9jsQ==}
     engines: {node: '>= 14'}
@@ -2486,6 +2492,8 @@ snapshots:
       ansi-styles: 6.2.1
       string-width: 5.1.2
       strip-ansi: 7.1.0
+
+  wyzie-lib@2.2.4: {}
 
   yaml@2.7.1: {}
 

@@ -1,7 +1,7 @@
 <script>
   export let language = 'en';
   export let source = 'all';
-  export let hearingImpaired = null;
+  export let hearingImpaired = 'indifferent';
 </script>
 
 <div class="flex justify-between items-center">
@@ -47,9 +47,9 @@
       id="hearing-impaired"
       class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md"
       bind:value={hearingImpaired}>
+      <option value="indifferent" selected>Show both</option>
       <option value="true">Only show</option>
       <option value="false">Exclude</option>
-      <option value="indifferent">Show both</option>
     </select>
   </div>
 </div> 

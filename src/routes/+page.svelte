@@ -7,6 +7,7 @@
   import SearchInput from "../components/SearchInput.svelte";
   import FilterOptions from "../components/FilterOptions.svelte";
   import EpisodeSelector from "../components/EpisodeSelector.svelte";
+  import SubtitleResults from "../components/SubtitleResults.svelte";
 
   let selectedContentType = "tvshow";
   let season = 1;
@@ -14,7 +15,7 @@
   let imdbId = "";
   let language = "en";
   let source = "all";
-  let hearingImpaired = null;
+  let hearingImpaired = "indifferent";
   let contentTitle = "";
   let searchResults = [];
   let isLoading = false;
@@ -22,6 +23,7 @@
   let tmdbApiKey = "9867f3f6a5e78a2639afb0e2ffc0a311";
   let isSearchFocused = false;
   let directTmdbId = "";
+  let subtitleResultsComponent;
 
   // Add function to handle clicking outside
   function handleClickOutside(event) {
@@ -57,6 +59,19 @@
   function handleSelectMedia(event) {
     selectedTmdbId = event.detail.id;
     contentTitle = event.detail.title;
+    imdbId = event.detail.imdbId || "";
+    
+    // Clear season and episode if it's a movie
+    if (selectedContentType === "movie") {
+      season = null;
+      episode = null;
+    }
+  }
+
+  // Watch for content type changes to clear season/episode for movies
+  $: if (selectedContentType === "movie") {
+    season = null;
+    episode = null;
   }
 
   $: searchUrl =
@@ -110,9 +125,23 @@
         <button
           class="mt-2 inline-flex justify-center py-2 px-4 shadow-md text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           class:pointer-events-none={!selectedTmdbId}
-          class:opacity-50={!selectedTmdbId}>
+          class:opacity-50={!selectedTmdbId}
+          on:click={() => subtitleResultsComponent?.search()}>
           Search {selectedContentType === "movie" ? "Movie" : "TV Show"}
         </button>
+
+        {#if selectedTmdbId}
+          <SubtitleResults
+            bind:this={subtitleResultsComponent}
+            tmdbId={selectedTmdbId}
+            imdbId={imdbId}
+            {season}
+            {episode}
+            {language}
+            {source}
+            {hearingImpaired}
+          />
+        {/if}
       </div>
     </main>
 

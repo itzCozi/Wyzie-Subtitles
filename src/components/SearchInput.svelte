@@ -34,7 +34,11 @@
     
     if (result) {
       contentTitle = result.title;
-      dispatch('selectMedia', { id: result.id, title: result.title });
+      dispatch('selectMedia', { 
+        id: result.id, 
+        title: result.title,
+        imdbId: result.imdb_id
+      });
       searchResults = [];
     }
     
@@ -43,7 +47,11 @@
 
   function selectMedia(media) {
     contentTitle = media.title || media.name;
-    dispatch('selectMedia', { id: media.id, title: media.title || media.name });
+    dispatch('selectMedia', { 
+      id: media.id, 
+      title: media.title || media.name,
+      imdbId: media.external_ids?.imdb_id
+    });
     searchResults = [];
     isSearchFocused = false;
   }
@@ -77,7 +85,9 @@
       bind:value={contentTitle}
       on:focus={() => {
         isSearchFocused = true;
-        directTmdbId = ""; // Clear TMDB ID when focusing on title search
+      }}
+      on:input={() => {
+        directTmdbId = "";
       }}
       class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md flex-grow" />
     <input
@@ -87,8 +97,10 @@
       bind:value={directTmdbId}
       on:focus={() => {
         isSearchFocused = false;
-        contentTitle = ""; // Clear title when focusing on TMDB ID
         searchResults = [];
+      }}
+      on:input={() => {
+        contentTitle = "";
       }}
       class="p-2 rounded-md bg-mono-accent text-type-darker focus:outline-none shadow-md w-32" />
   </div>

@@ -29,7 +29,8 @@
     "cssnano": "^7.0.6",
     "lucide-svelte": "^0.447.0",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-svelte-monorepo": "github:sveltejs/vite-plugin-svelte"
+    "vite-plugin-svelte-monorepo": "github:sveltejs/vite-plugin-svelte",
+    "wyzie-lib": "^2.2.4"
   },
   "prettier": {
     "trailingComma": "all",
