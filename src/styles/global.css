@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root ::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+:root ::-webkit-scrollbar-thumb {
+  background-color: #505050;
+  cursor: pointer;
+}
+
+:root {
+  --background-color: #f0f0f0;
+  font-family: "open sans";
+}
+
+html,
+body {
+  scroll-behavior: smooth;
+  background-color: var(--background-color);
+  color: #404040;
+  font-family: "open sans";
+}
+
+a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
