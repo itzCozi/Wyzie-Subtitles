@@ -84,11 +84,11 @@
   <div class="flex flex-col min-h-screen">
     <Header />
 
-    <main class="flex-grow mt-8 mx-auto px-6">
-      <div class="bg-mono-secondary shadow-lg p-7 rounded-md flex flex-col gap-4 max-w-xl mx-auto">
+    <main class="flex-grow mt-8 mx-auto px-6 pb-10 max-w-3xl w-full">
+      <div class="fuji-card p-8 flex flex-col gap-5 max-w-2xl mx-auto">
         <span>
-          <h3 class="font-semibold text-type-subheader text-2xl mb-1">Subtitles for Free</h3>
-          <p class="text-type-dimmed text-sm">
+          <h3 class="font-semibold text-type-subheader-light dark:text-type-subheader-dark text-2xl mb-2">Subtitles for Free</h3>
+          <p class="text-type-dimmed-light dark:text-type-dimmed-dark text-sm">
             Search and download free subtitles for movies and TV shows instantly. Enter the title,
             select the content type, and search the Wyzie API for any available subtitles.
           </p>
@@ -123,9 +123,9 @@
         {/if}
 
         <button
-          class="mt-2 inline-flex justify-center py-2 px-4 shadow-md text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          class:pointer-events-none={!selectedTmdbId}
+          class="fuji-button !rounded-md mt-2 inline-flex justify-center"
           class:opacity-50={!selectedTmdbId}
+          class:pointer-events-none={!selectedTmdbId}
           on:click={() => subtitleResultsComponent?.search()}>
           Search {selectedContentType === "movie" ? "Movie" : "TV Show"}
         </button>

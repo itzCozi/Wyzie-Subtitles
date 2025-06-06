@@ -1,5 +1,6 @@
 module.exports = {
   content: ["./src/**/*.{html,js,svelte,ts}"],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -14,20 +15,64 @@ module.exports = {
           700: "#1d4ed8",
         },
         mono: {
-          background: "#f0f0f0",
-          context: "#e0e0e0",
-          secondary: "#ffffff",
-          accent: "#eeeeee",
-          accent2: "#cdcdcd",
+          background: {
+            light: "#f5f5f7",
+            dark: "#1d1d1f"
+          },
+          context: {
+            light: "#e8e8ed",
+            dark: "#2d2d30"
+          },
+          secondary: {
+            light: "#ffffff",
+            dark: "#2d2d2f"
+          },
+          accent: {
+            light: "#f2f2f7",
+            dark: "#3a3a3c"
+          },
+          accent2: {
+            light: "#e5e5ea",
+            dark: "#48484a"
+          },
         },
         type: {
-          emphasized: "#1b1b1b",
-          subheader: "#252525",
-          dimmed: "#303030",
-          darker: "#444444",
-          footer: "#6b7280",
-          secondary: "#555555",
+          emphasized: {
+            light: "#1d1d1f",
+            dark: "#f5f5f7"
+          },
+          subheader: {
+            light: "#252529",
+            dark: "#e8e8ed"
+          },
+          dimmed: {
+            light: "#424245",
+            dark: "#a1a1a6"
+          },
+          darker: {
+            light: "#555555",
+            dark: "#8e8e93"
+          },
+          footer: {
+            light: "#6b7280",
+            dark: "#86868b"
+          },
+          secondary: {
+            light: "#636366",
+            dark: "#aeaeb2"
+          },
         },
+      },
+      borderRadius: {
+        'fuji': '12px',
+        'fuji-sm': '8px',
+        'fuji-lg': '16px',
+      },
+      boxShadow: {
+        'fuji': '0 4px 8px rgba(0, 0, 0, 0.05)',
+        'fuji-md': '0 8px 16px rgba(0, 0, 0, 0.06)',
+        'fuji-lg': '0 12px 24px rgba(0, 0, 0, 0.08)',
+        'fuji-dark': '0 4px 8px rgba(0, 0, 0, 0.25)',
       },
     },
   },

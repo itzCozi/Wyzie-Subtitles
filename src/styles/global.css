@@ -2,35 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-:root ::-webkit-scrollbar {
+/* Light mode scrollbar */
+.light ::-webkit-scrollbar {
   width: 8px;
   background-color: transparent;
 }
 
-:root ::-webkit-scrollbar-thumb {
+.light ::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 8px;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
   background-color: #505050;
-  cursor: pointer;
+  border-radius: 8px;
 }
 
 :root {
   --background-color: #f0f0f0;
-  font-family: "open sans";
+  font-family: -fuji-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html,
 body {
   scroll-behavior: smooth;
-  background-color: var(--background-color);
-  color: #404040;
-  font-family: "open sans";
+  @apply bg-mono-background-light text-type-darker-light dark:bg-mono-background-dark dark:text-type-darker-dark;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {
-  color: #2563eb;
-  text-decoration: none;
+  @apply text-primary-600 hover:text-primary-700 hover:no-underline;
 }
 
-a:hover {
-  color: #2563eb;
-  text-decoration: underline;
+.fuji-button {
+  @apply py-2.5 px-5 font-medium rounded-full transition-all duration-200 ease-in-out;
+  @apply bg-primary-600 text-white hover:bg-primary-700;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.fuji-card {
+  @apply bg-mono-secondary-light dark:bg-mono-secondary-dark rounded-fuji;
+  @apply shadow-fuji dark:shadow-fuji-dark;
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.fuji-input {
+  @apply p-2.5 rounded-fuji-sm w-full transition-all duration-200;
+  @apply bg-mono-accent-light dark:bg-mono-accent-dark;
+  @apply text-type-darker-light dark:text-type-darker-dark;
+  @apply border border-mono-accent2-light dark:border-mono-accent2-dark;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-400;
+}
+
+.fuji-toggle {
+  @apply relative inline-flex h-6 w-11 items-center rounded-full;
+  @apply bg-mono-accent2-light dark:bg-mono-accent2-dark;
+}
+
+.fuji-toggle[aria-checked="true"] {
+  @apply bg-primary-600;
+}
+
+.fuji-toggle-thumb {
+  @apply pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white;
+  @apply shadow-lg ring-0 transition duration-200 ease-in-out;
+}
+
+.fuji-toggle[aria-checked="false"] .fuji-toggle-thumb {
+  @apply translate-x-1;
+}
+
+.fuji-toggle[aria-checked="true"] .fuji-toggle-thumb {
+  @apply translate-x-5;
 }
