@@ -24,6 +24,8 @@
   let isSearchFocused = false;
   let directTmdbId = "";
   let subtitleResultsComponent;
+  let isSearchButtonLoading = false;
+  let hasSearched = false;
 
   // Add function to handle clicking outside
   function handleClickOutside(event) {
@@ -68,6 +70,31 @@
     }
   }
 
+  function handleSearch() {
+    if (!selectedTmdbId) return;
+    
+    isSearchButtonLoading = true;
+    
+    // Initialize the component if it hasn't been created yet
+    if (!subtitleResultsComponent) {
+      console.error("Subtitle results component not initialized!");
+      isSearchButtonLoading = false;
+      return;
+    }
+    
+    subtitleResultsComponent.search()
+      .then((results) => {
+        console.log("Search completed successfully:", results);
+        hasSearched = true;
+        isSearchButtonLoading = false;
+      })
+      .catch((error) => {
+        console.error("Search failed:", error);
+        hasSearched = true;
+        isSearchButtonLoading = false;
+      });
+  }
+
   // Watch for content type changes to clear season/episode for movies
   $: if (selectedContentType === "movie") {
     season = null;
@@ -85,7 +112,8 @@
     <Header />
 
     <main class="flex-grow mt-8 mx-auto px-6 pb-10 max-w-3xl w-full">
-      <div class="fuji-card p-8 flex flex-col gap-5 max-w-2xl mx-auto">
+      <!-- Search -->
+      <div class="fuji-card p-8 flex flex-col gap-5 mb-6">
         <span>
           <h3 class="font-semibold text-type-subheader-light dark:text-type-subheader-dark text-2xl mb-2">Subtitles for Free</h3>
           <p class="text-type-dimmed-light dark:text-type-dimmed-dark text-sm">
@@ -123,25 +151,49 @@
         {/if}
 
         <button
-          class="fuji-button !rounded-md mt-2 inline-flex justify-center"
-          class:opacity-50={!selectedTmdbId}
-          class:pointer-events-none={!selectedTmdbId}
-          on:click={() => subtitleResultsComponent?.search()}>
-          Search {selectedContentType === "movie" ? "Movie" : "TV Show"}
+          type="button"
+          class="fuji-button !rounded-md mt-2 inline-flex justify-center items-center"
+          disabled={isSearchButtonLoading || !selectedTmdbId}
+          on:click={() => {
+            if (selectedTmdbId && !isSearchButtonLoading) {
+              console.log("Initiating search...");
+              handleSearch();
+            }
+          }}>
+          {#if isSearchButtonLoading}
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+            Searching...
+          {:else}
+            Search {selectedContentType === "movie" ? "Movie" : "TV Show"}
+          {/if}
         </button>
+      </div>
 
-        {#if selectedTmdbId}
-          <SubtitleResults
-            bind:this={subtitleResultsComponent}
-            tmdbId={selectedTmdbId}
-            imdbId={imdbId}
-            {season}
-            {episode}
-            {language}
-            {source}
-            {hearingImpaired}
-          />
+      <!-- Results -->
+      <div class="fuji-card p-6 {hasSearched ? '' : 'hidden'}">
+        {#if contentTitle}
+          <div class="mb-4 pb-3 border-b border-mono-accent2-light dark:border-mono-accent2-dark">
+            <h3 class="font-medium text-type-subheader-light dark:text-type-subheader-dark text-xl">
+              Results for: <span class="font-semibold">{contentTitle}</span>
+              {#if selectedContentType === "tvshow" && season !== null && episode !== null}
+                <span class="text-sm text-type-secondary-light dark:text-type-secondary-dark ml-2">
+                  S{season}:E{episode}
+                </span>
+              {/if}
+            </h3>
+          </div>
         {/if}
+        
+        <SubtitleResults
+          bind:this={subtitleResultsComponent}
+          tmdbId={selectedTmdbId}
+          imdbId={imdbId}
+          language={language}
+          source={source}
+          hearingImpaired={hearingImpaired}
+          season={selectedContentType === "tvshow" ? season : undefined}
+          episode={selectedContentType === "tvshow" ? episode : undefined}
+        />
       </div>
     </main>
 

@@ -59,7 +59,7 @@ export async function fetchSubtitles({
     throw new WyzieAPIError({
       code: 400,
       message: 'Missing required parameter',
-      details: 'Either tmdbId or imdbId must be provided'
+      details: 'Either tmdb_id or imdb_id must be provided'
     });
   }
 
@@ -75,7 +75,7 @@ export async function fetchSubtitles({
   let searchParams: SearchSubtitlesParams;
 
   if (imdb_id) {
-    if (season !== undefined && episode !== undefined) {
+    if (season !== null && season !== undefined && episode !== null && episode !== undefined) {
       // Both season and episode are provided
       searchParams = {
         imdb_id,
@@ -84,7 +84,7 @@ export async function fetchSubtitles({
         episode
       };
     } else {
-      // Neither season nor episode is provided
+      // Neither season nor episode is provided or they are null
       searchParams = {
         imdb_id,
         ...baseParams
@@ -94,7 +94,7 @@ export async function fetchSubtitles({
     // Convert tmdbId to number if it's a string
     const tmdbIdNumber = typeof tmdb_id === 'string' ? parseInt(tmdb_id, 10) : tmdb_id;
 
-    if (season !== undefined && episode !== undefined) {
+    if (season !== null && season !== undefined && episode !== null && episode !== undefined) {
       // Both season and episode are provided
       searchParams = {
         tmdb_id: tmdbIdNumber as number,
@@ -103,7 +103,7 @@ export async function fetchSubtitles({
         episode
       };
     } else {
-      // Neither season nor episode is provided
+      // Neither season nor episode is provided or they are null
       searchParams = {
         tmdb_id: tmdbIdNumber as number,
         ...baseParams
